@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" role="img" aria-label="RS Labs">
+  <defs>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6bff"/><stop offset="1" stop-color="#0a3ea8"/>
+    </linearGradient>
+    <linearGradient id="t" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18c5b3"/><stop offset="1" stop-color="#0b8f8a"/>
+    </linearGradient>
+  </defs>
+  <!-- Integration network mark -->
+  <g transform="translate(58 60)" stroke-width="5" stroke-linecap="round">
+    <g stroke="#0b1f3a" opacity=".35">
+      <line x1="0" y1="0" x2="0" y2="-40"/><line x1="0" y1="0" x2="35" y2="20"/><line x1="0" y1="0" x2="-35" y2="20"/>
+    </g>
+    <path d="M0 -40 L35 -20 L35 20 L0 40 L-35 20 L-35 -20Z" fill="none" stroke="url(#b)"/>
+    <circle r="13" fill="url(#t)"/>
+    <circle cy="-40" r="7" fill="url(#b)"/>
+    <circle cx="35" cy="20" r="7" fill="url(#b)"/>
+    <circle cx="-35" cy="20" r="7" fill="url(#b)"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="124" y="66" font-family="'Segoe UI',Inter,Helvetica,Arial,sans-serif" font-size="48" font-weight="700" letter-spacing="3" fill="#0b1f3a">RS<tspan fill="#2f6bff" dx="8">LABS</tspan></text>
+  <text x="126" y="92" font-family="'Segoe UI',Inter,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" letter-spacing="3.4" fill="#0b1f3a" opacity=".6">FROM IDEA TO ENTERPRISE</text>
+</svg>
