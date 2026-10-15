@@ -35,7 +35,6 @@ export function Sheet({ id, no, title, tone = 'ink', children, className = '' }:
               Sheet {no} <span aria-hidden="true">—</span> {title}
             </span>
           </span>
-          <span className="hidden sm:inline">RS Labs / rs-labs.in</span>
         </div>
         <div className={`rule mt-4 h-px ${line}`} />
       </div>

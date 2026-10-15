@@ -4,42 +4,26 @@ import { Arrow } from './Hero'
 import { Sheet } from './Sheet'
 
 /**
- * Sheet 05. No backend: the composer turns a few choices into a ready-to-send
- * email in the visitor's own mail app, and the address is always visible.
+ * Sheet 05 is the hero's bookend: large type, then a single sentence the
+ * visitor completes. No backend; it prepares an email in their own mail app,
+ * and the address is always visible for anyone who'd rather just write.
  */
 export function Contact() {
-  const [picked, setPicked] = useState<Set<Interest>>(new Set())
-  const [message, setMessage] = useState('')
+  const [topic, setTopic] = useState<Interest>(INTERESTS[0])
+  const [detail, setDetail] = useState('')
   const [copied, setCopied] = useState(false)
 
   // Other sheets can pre-select a topic (e.g. "Ask about early access").
   useEffect(() => {
-    const on = (e: Event) => {
-      const interest = (e as CustomEvent<Interest>).detail
-      setPicked((p) => new Set(p).add(interest))
-    }
+    const on = (e: Event) => setTopic((e as CustomEvent<Interest>).detail)
     window.addEventListener('rs:interest', on)
     return () => window.removeEventListener('rs:interest', on)
   }, [])
 
-  function toggle(i: Interest) {
-    setPicked((p) => {
-      const n = new Set(p)
-      if (n.has(i)) n.delete(i)
-      else n.add(i)
-      return n
-    })
-  }
-
   function compose(e: FormEvent) {
     e.preventDefault()
-    const topics = [...picked]
-    const subject = topics.length ? `Project enquiry: ${topics.join(', ')}` : 'Hello RS Labs'
-    const body = [
-      topics.length ? `Interested in: ${topics.join(', ')}` : '',
-      '',
-      message.trim() || 'A few lines about what I have in mind:',
-    ].join('\n').trim()
+    const subject = `Hello RS Labs: ${topic}`
+    const body = `Hi RS Labs,\n\nI'd like help with ${topic}.\n\n${detail.trim() || 'In short: '}`
     window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
@@ -53,73 +37,71 @@ export function Contact() {
     }
   }
 
+  const field =
+    'border-0 border-b-2 border-signal/70 bg-transparent px-0 text-paper focus:border-signal'
+
   return (
     <Sheet id="contact" no="05" title="Contact">
-      <div className="wrap grid gap-16 lg:grid-cols-12">
-        <div className="lg:col-span-6">
-          <h2 id="contact-title" className="display text-[clamp(2.6rem,6vw,5.5rem)]" data-reveal>
-            Tell us what you're trying to build.
-          </h2>
-          <p className="mt-6 max-w-[40ch] text-haze" data-reveal style={{ '--delay': '100ms' } as CSSProperties}>
-            A few lines is enough: the problem, who it's for, and any timing. We'll reply with questions or a next step.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2" data-reveal style={{ '--delay': '160ms' } as CSSProperties}>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-[-0.02em] underline decoration-ink-700 decoration-1 underline-offset-[0.25em] transition-colors hover:decoration-signal"
-            >
+      <div className="wrap">
+        <h2 id="contact-title" className="display max-w-[14ch] text-[clamp(2.9rem,7.4vw,7.25rem)]" data-reveal>
+          Tell us what you're trying to build.
+        </h2>
+
+        <div className="mt-16 grid gap-14 lg:grid-cols-12">
+          <form onSubmit={compose} className="lg:col-span-8" data-reveal style={{ '--delay': '120ms' } as CSSProperties}>
+            <p className="font-display text-[clamp(1.45rem,2.6vw,2.25rem)] font-medium leading-[1.6] tracking-[-0.02em] text-haze">
+              Hi RS Labs, I'd like help with{' '}
+              <label className="sr-only" htmlFor="contact-topic">Topic</label>
+              {/* The select sizes itself to the chosen phrase via an invisible twin, so the sentence reads naturally. */}
+              <span className="relative inline-block max-w-full">
+                <span aria-hidden="true" className="invisible whitespace-nowrap border-b-2 border-transparent pr-7">{topic}</span>
+                <select
+                  id="contact-topic"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value as Interest)}
+                  className={`${field} absolute inset-0 w-full cursor-pointer appearance-none pr-7`}
+                >
+                  {INTERESTS.map((i) => (
+                    <option key={i} value={i} className="bg-ink-900 text-base">{i}</option>
+                  ))}
+                </select>
+                <svg aria-hidden="true" viewBox="0 0 12 12" className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 text-signal-soft">
+                  <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </span>
+              <span className="whitespace-nowrap">. In short:</span>
+            </p>
+            <label className="sr-only" htmlFor="contact-detail">In short, what are you trying to build?</label>
+            <textarea
+              id="contact-detail"
+              rows={2}
+              value={detail}
+              onChange={(e) => setDetail(e.target.value)}
+              placeholder="the problem, who has it, and any timing"
+              className={`${field} mt-2 w-full resize-none font-display text-[clamp(1.2rem,2vw,1.6rem)] leading-normal placeholder:text-mist/60`}
+            />
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <button
+                type="submit"
+                className="group inline-flex items-center gap-6 bg-signal px-5 py-4 font-medium text-white transition-colors hover:bg-[#2f69ea]"
+              >
+                Write the email
+                <Arrow className="transition-transform duration-200 group-hover:translate-x-1" />
+              </button>
+              <p className="text-[0.85rem] text-mist">Opens your own mail app. Nothing is sent from this page.</p>
+            </div>
+          </form>
+
+          <div className="self-end border-t border-ink-700 pt-6 lg:col-span-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0" data-reveal style={{ '--delay': '200ms' } as CSSProperties}>
+            <p className="label text-mist">Or write directly</p>
+            <a href={`mailto:${CONTACT_EMAIL}`} className="mt-2 block text-[1.35rem] text-paper underline decoration-ink-700 underline-offset-[0.3em] hover:decoration-signal">
               {CONTACT_EMAIL}
             </a>
-            <button type="button" onClick={copy} className="label text-signal-soft hover:text-paper" aria-live="polite">
+            <button type="button" onClick={copy} className="label mt-3 text-signal-soft hover:text-paper" aria-live="polite">
               {copied ? 'Copied' : 'Copy address'}
             </button>
           </div>
         </div>
-
-        <form onSubmit={compose} className="border-t border-ink-700 pt-8 lg:col-span-5 lg:col-start-8 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-2" data-reveal style={{ '--delay': '200ms' } as CSSProperties}>
-          <fieldset>
-            <legend className="label text-mist">I'm interested in</legend>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {INTERESTS.map((i) => {
-                const on = picked.has(i)
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => toggle(i)}
-                    className={`rounded-[2px] border px-3 py-2 text-[0.88rem] transition-colors ${
-                      on ? 'border-signal bg-signal text-white' : 'border-ink-700 text-haze hover:border-mist hover:text-paper'
-                    }`}
-                  >
-                    {i}
-                  </button>
-                )
-              })}
-            </div>
-          </fieldset>
-
-          <label htmlFor="contact-message" className="label mt-8 block text-mist">
-            A few lines about it <span className="normal-case tracking-normal">(optional)</span>
-          </label>
-          <textarea
-            id="contact-message"
-            rows={4}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="What's the problem, and who has it?"
-            className="mt-3 w-full resize-y rounded-[2px] border border-ink-700 bg-transparent p-3 text-paper placeholder:text-mist/70 focus:border-signal focus:outline-none"
-          />
-
-          <button
-            type="submit"
-            className="group mt-6 inline-flex w-full items-center justify-between bg-signal px-5 py-4 font-medium text-white transition-colors hover:bg-[#2f69ea] sm:w-auto sm:gap-6"
-          >
-            Open in your email app
-            <Arrow className="transition-transform duration-200 group-hover:translate-x-1" />
-          </button>
-          <p className="mt-3 text-[0.82rem] text-mist">Nothing is sent from this page; it prepares an email in your own mail app.</p>
-        </form>
       </div>
     </Sheet>
   )

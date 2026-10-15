@@ -75,6 +75,15 @@ body {
   font-variation-settings: "wdth" 100;
 }
 
+/* Sheet titles share one scale. Only the hero and contact (the bookends) go larger. */
+@utility section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 3.4vw, 3.1rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
 /* Drafting grid used behind the hero */
 .drafting-grid {
   background-image:

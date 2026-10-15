@@ -14,11 +14,12 @@ export const SHEETS: { id: SheetId; no: string; label: string }[] = [
 ]
 
 export const INTERESTS = [
-  'SaaS platform',
-  'Web application',
-  'Android app',
-  'AI tool',
-  'Creator platform early access',
+  'a SaaS platform',
+  'a web application',
+  'an Android app',
+  'an AI tool',
+  'early access to the creator platform',
+  'something else',
 ] as const
 
 export type Interest = (typeof INTERESTS)[number]

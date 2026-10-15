@@ -20,14 +20,14 @@ const QUEUE: Omit<FileRow, 'progress'>[] = [
 const PROJECTS = ['Spring campaign', 'Studio interviews', 'B-roll library']
 const EXPIRY = ['24 hours', '7 days', '30 days'] as const
 
-type Props = { focus: Region | null; onFocus: (r: Region | null) => void }
+type Props = { step: Region | null }
 
 /**
  * A working mock of the creator media platform, built from real components:
  * uploads progress, rows can be selected, and the share panel produces a link.
  * Nothing leaves the page.
  */
-export function ProductPreview({ focus, onFocus }: Props) {
+export function ProductPreview({ step }: Props) {
   const [files, setFiles] = useState<FileRow[]>(INITIAL)
   const [project, setProject] = useState(PROJECTS[0])
   const [selected, setSelected] = useState<Set<string>>(new Set(['a', 'c']))
@@ -59,7 +59,8 @@ export function ProductPreview({ focus, onFocus }: Props) {
 
   function addFile() {
     if (!next) return
-    setFiles((fs) => [...fs, { ...next, progress: prefersReducedMotion() ? 100 : 0 }])
+    // With reduced motion the upload is shown part-way and holds still.
+    setFiles((fs) => [...fs, { ...next, progress: prefersReducedMotion() ? 64 : 0 }])
   }
   function toggle(id: string) {
     setLink(null)
@@ -85,9 +86,16 @@ export function ProductPreview({ focus, onFocus }: Props) {
     }
   }
 
+  // The case study's story drives the preview: each step stages its part of the UI.
+  useEffect(() => {
+    if (step === 1 && !uploading) addFile()
+    if (step === 3 && !link && selected.size > 0) createLink()
+  }, [step])
+
   const ring = (r: Region) =>
-    `relative transition-[box-shadow] duration-300 ${focus === r ? 'shadow-[inset_0_0_0_1px_var(--color-signal)]' : ''}`
-  const hover = (r: Region) => ({ onMouseEnter: () => onFocus(r), onMouseLeave: () => onFocus(null) })
+    `relative transition-[box-shadow,opacity] duration-500 ${
+      step === r ? 'shadow-[inset_0_0_0_1px_var(--color-signal)]' : step ? 'opacity-55' : ''
+    }`
 
   return (
     <div
@@ -107,19 +115,19 @@ export function ProductPreview({ focus, onFocus }: Props) {
         <span className="label shrink-0 text-[0.62rem] text-violet">Preview · not live</span>
       </div>
 
-      <div className="grid md:grid-cols-[10.5rem_1fr] xl:grid-cols-[10.5rem_1fr_15.5rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-[10.5rem_1fr] 2xl:grid-cols-[10.5rem_1fr_15.5rem]">
         {/* 2 — Projects */}
-        <nav aria-label="Projects (preview)" className={`hidden border-r border-ink-700 p-3 md:block ${ring(2)}`} {...hover(2)}>
+        <nav aria-label="Projects (preview)" className={`border-b border-ink-700 p-3 md:border-b-0 md:border-r ${ring(2)}`}>
           <Pin n={2} />
           <p className="label px-2 pb-2 pt-1 text-[0.62rem] text-mist">Projects</p>
-          <ul className="space-y-0.5 text-[0.84rem]">
+          <ul className="flex gap-1 overflow-x-auto pr-6 text-[0.84rem] md:block md:space-y-0.5 md:pr-0">
             {PROJECTS.map((p) => (
               <li key={p}>
                 <button
                   type="button"
                   onClick={() => setProject(p)}
                   aria-pressed={project === p}
-                  className="w-full rounded-[2px] px-2 py-1.5 text-left text-haze transition-colors hover:bg-ink-800 aria-pressed:bg-ink-800 aria-pressed:text-paper"
+                  className="w-full whitespace-nowrap rounded-[2px] px-2 py-1.5 text-left text-haze transition-colors hover:bg-ink-800 aria-pressed:bg-ink-800 aria-pressed:text-paper"
                 >
                   {p}
                 </button>
@@ -129,7 +137,7 @@ export function ProductPreview({ focus, onFocus }: Props) {
         </nav>
 
         {/* 1 — Uploads + library */}
-        <div className={`min-w-0 p-4 ${ring(1)}`} {...hover(1)}>
+        <div className={`min-w-0 p-4 ${ring(1)}`}>
           <Pin n={1} />
           <div className="flex items-end justify-between gap-3 pr-7">
             <div>
@@ -196,7 +204,7 @@ export function ProductPreview({ focus, onFocus }: Props) {
         </div>
 
         {/* 3 — Share */}
-        <div className={`border-t border-ink-700 p-4 md:col-span-2 xl:col-span-1 xl:border-l xl:border-t-0 ${ring(3)}`} {...hover(3)}>
+        <div className={`border-t border-ink-700 p-4 md:col-span-2 2xl:col-span-1 2xl:border-l 2xl:border-t-0 ${ring(3)}`}>
           <Pin n={3} />
           <p className="font-display text-base font-semibold">Share with an editor</p>
           <p className="label mt-1 text-[0.62rem] text-mist">

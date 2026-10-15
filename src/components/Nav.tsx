@@ -4,7 +4,6 @@ import { useActiveSection } from '../hooks/useReveal'
 import { Wordmark } from './Mark'
 
 const IDS = SHEETS.map((s) => s.id)
-const INDEX = SHEETS.filter((s) => s.id !== 'contact')
 
 /**
  * The nav is the drawing set's index: sheet numbers, with one shared marker
@@ -49,9 +48,9 @@ export function Nav() {
           <Wordmark />
         </a>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden md:block">
           <ul ref={listRef} className="relative flex items-center gap-7">
-            {INDEX.map((s) => (
+            {SHEETS.map((s) => (
               <li key={s.id} data-id={s.id}>
                 <a
                   href={`#${s.id}`}
@@ -75,12 +74,6 @@ export function Nav() {
               }}
             />
           </ul>
-          <a
-            href="#contact"
-            className="label border border-signal/60 px-3.5 py-2 text-paper transition-colors hover:border-signal hover:bg-signal"
-          >
-            05 Contact
-          </a>
         </div>
 
         <button
