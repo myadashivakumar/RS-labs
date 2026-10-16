@@ -1,11 +1,10 @@
-import { Capabilities } from './components/Capabilities'
+import { About } from './components/About'
 import { Contact } from './components/Contact'
 import { Footer } from './components/Footer'
 import { Hero } from './components/Hero'
-import { Method } from './components/Method'
 import { Nav } from './components/Nav'
-import { Studio } from './components/Studio'
-import { Work } from './components/Work'
+import { Products } from './components/Products'
+import { Services } from './components/Services'
 import { useReveal } from './hooks/useReveal'
 
 export default function App() {
@@ -15,10 +14,9 @@ export default function App() {
       <Nav />
       <main id="main">
         <Hero />
-        <Work />
-        <Capabilities />
-        <Method />
-        <Studio />
+        <Services />
+        <Products />
+        <About />
         <Contact />
       </main>
       <Footer />

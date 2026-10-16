@@ -1,108 +1,71 @@
-import { useEffect, useState, type CSSProperties, type FormEvent } from 'react'
-import { CONTACT_EMAIL, INTERESTS, type Interest } from '../content'
-import { Arrow } from './Hero'
-import { Sheet } from './Sheet'
+import { useState, type FormEvent } from 'react'
+import { CONTACT_EMAIL } from '../content'
 
 /**
- * Sheet 05 is the hero's bookend: large type, then a single sentence the
- * visitor completes. No backend; it prepares an email in their own mail app,
- * and the address is always visible for anyone who'd rather just write.
+ * Dark contact band. There's no backend: the form prepares an email in the
+ * visitor's own mail app, and the address is shown for anyone who'd rather write.
  */
 export function Contact() {
-  const [topic, setTopic] = useState<Interest>(INTERESTS[0])
-  const [detail, setDetail] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [name, setName] = useState('')
+  const [company, setCompany] = useState('')
+  const [message, setMessage] = useState('')
 
-  // Other sheets can pre-select a topic (e.g. "Ask about early access").
-  useEffect(() => {
-    const on = (e: Event) => setTopic((e as CustomEvent<Interest>).detail)
-    window.addEventListener('rs:interest', on)
-    return () => window.removeEventListener('rs:interest', on)
-  }, [])
-
-  function compose(e: FormEvent) {
+  function send(e: FormEvent) {
     e.preventDefault()
-    const subject = `Hello RS Labs: ${topic}`
-    const body = `Hi RS Labs,\n\nI'd like help with ${topic}.\n\n${detail.trim() || 'In short: '}`
+    const subject = `Enquiry from ${name.trim() || 'the website'}${company.trim() ? ` (${company.trim()})` : ''}`
+    const body = `${message.trim()}\n\n${name.trim()}${company.trim() ? `\n${company.trim()}` : ''}`
     window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(CONTACT_EMAIL)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1800)
-    } catch {
-      /* clipboard unavailable: the address is visible to select by hand */
-    }
-  }
-
   const field =
-    'border-0 border-b-2 border-signal/70 bg-transparent px-0 text-paper focus:border-signal'
+    'mt-2 w-full border-0 border-b border-white/25 bg-transparent px-0 py-2.5 text-white placeholder:text-white/40 focus:border-brand focus:ring-0'
 
   return (
-    <Sheet id="contact" no="05" title="Contact">
-      <div className="wrap">
-        <h2 id="contact-title" className="display max-w-[14ch] text-[clamp(2.9rem,7.4vw,7.25rem)]" data-reveal>
-          Tell us what you're trying to build.
-        </h2>
-
-        <div className="mt-16 grid gap-14 lg:grid-cols-12">
-          <form onSubmit={compose} className="lg:col-span-8" data-reveal style={{ '--delay': '120ms' } as CSSProperties}>
-            <p className="font-display text-[clamp(1.45rem,2.6vw,2.25rem)] font-medium leading-[1.6] tracking-[-0.02em] text-haze">
-              Hi RS Labs, I'd like help with{' '}
-              <label className="sr-only" htmlFor="contact-topic">Topic</label>
-              {/* The select sizes itself to the chosen phrase via an invisible twin, so the sentence reads naturally. */}
-              <span className="relative inline-block max-w-full">
-                <span aria-hidden="true" className="invisible whitespace-nowrap border-b-2 border-transparent pr-7">{topic}</span>
-                <select
-                  id="contact-topic"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value as Interest)}
-                  className={`${field} absolute inset-0 w-full cursor-pointer appearance-none pr-7`}
-                >
-                  {INTERESTS.map((i) => (
-                    <option key={i} value={i} className="bg-ink-900 text-base">{i}</option>
-                  ))}
-                </select>
-                <svg aria-hidden="true" viewBox="0 0 12 12" className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 text-signal-soft">
-                  <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-              </span>
-              <span className="whitespace-nowrap">. In short:</span>
-            </p>
-            <label className="sr-only" htmlFor="contact-detail">In short, what are you trying to build?</label>
-            <textarea
-              id="contact-detail"
-              rows={2}
-              value={detail}
-              onChange={(e) => setDetail(e.target.value)}
-              placeholder="the problem, who has it, and any timing"
-              className={`${field} mt-2 w-full resize-none font-display text-[clamp(1.2rem,2vw,1.6rem)] leading-normal placeholder:text-mist/60`}
-            />
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <button
-                type="submit"
-                className="group inline-flex items-center gap-6 bg-signal px-5 py-4 font-medium text-white transition-colors hover:bg-[#2f69ea]"
-              >
-                Write the email
-                <Arrow className="transition-transform duration-200 group-hover:translate-x-1" />
-              </button>
-              <p className="text-[0.85rem] text-mist">Opens your own mail app. Nothing is sent from this page.</p>
-            </div>
-          </form>
-
-          <div className="self-end border-t border-ink-700 pt-6 lg:col-span-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0" data-reveal style={{ '--delay': '200ms' } as CSSProperties}>
-            <p className="label text-mist">Or write directly</p>
-            <a href={`mailto:${CONTACT_EMAIL}`} className="mt-2 block text-[1.35rem] text-paper underline decoration-ink-700 underline-offset-[0.3em] hover:decoration-signal">
-              {CONTACT_EMAIL}
-            </a>
-            <button type="button" onClick={copy} className="label mt-3 text-signal-soft hover:text-paper" aria-live="polite">
-              {copied ? 'Copied' : 'Copy address'}
-            </button>
-          </div>
+    <section id="contact" aria-labelledby="contact-title" className="relative overflow-hidden bg-ink py-[var(--section-y)] text-white">
+      <div aria-hidden="true" className="pointer-events-none absolute -left-40 top-0 h-full w-[40rem] bg-gradient-to-br from-brand/35 via-violet/25 to-transparent blur-3xl" />
+      <div className="wrap relative grid gap-12 lg:grid-cols-2 lg:gap-20">
+        <div>
+          <p className="eyebrow !text-[#9db8ff]" data-reveal>Contact us</p>
+          <h2 id="contact-title" className="heading mt-3" data-reveal>
+            Let's build something together.
+          </h2>
+          <p className="mt-6 max-w-[42ch] text-white/70" data-reveal>
+            Tell us about your idea or project, and we'll get back to you with questions or a next step.
+          </p>
+          <p className="mt-10 text-sm text-white/55" data-reveal>Or email us at</p>
+          <a href={`mailto:${CONTACT_EMAIL}`} className="mt-1 inline-block text-xl underline decoration-white/30 underline-offset-4 hover:decoration-white" data-reveal>
+            {CONTACT_EMAIL}
+          </a>
         </div>
+
+        <form onSubmit={send} className="grid gap-6 sm:grid-cols-2" data-reveal>
+          <label className="block text-sm text-white/70">
+            Your name
+            <input required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className={field} />
+          </label>
+          <label className="block text-sm text-white/70">
+            Company <span className="text-white/40">(optional)</span>
+            <input value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" className={field} />
+          </label>
+          <label className="block text-sm text-white/70 sm:col-span-2">
+            How can we help?
+            <textarea
+              required
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="A few lines about your project"
+              className={`${field} resize-y`}
+            />
+          </label>
+          <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
+            <button type="submit" className="rounded-md bg-white px-6 py-3.5 font-medium text-ink transition-colors hover:bg-lavender">
+              Send message
+            </button>
+            <p className="text-sm text-white/50">Opens your email app with the message ready to send.</p>
+          </div>
+        </form>
       </div>
-    </Sheet>
+    </section>
   )
 }

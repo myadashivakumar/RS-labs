@@ -3,32 +3,47 @@
 export const CONTACT_EMAIL = 'hello@rs-labs.in'
 export const TAGLINE = 'Build. Create. Innovate.'
 
-export type SheetId = 'work' | 'capabilities' | 'method' | 'studio' | 'contact'
-
-export const SHEETS: { id: SheetId; no: string; label: string }[] = [
-  { id: 'work', no: '01', label: 'Work' },
-  { id: 'capabilities', no: '02', label: 'Capabilities' },
-  { id: 'method', no: '03', label: 'Method' },
-  { id: 'studio', no: '04', label: 'Studio' },
-  { id: 'contact', no: '05', label: 'Contact' },
+export const NAV = [
+  { href: '#services', label: 'Services' },
+  { href: '#products', label: 'Products' },
+  { href: '#about', label: 'About' },
 ]
 
-export const INTERESTS = [
-  'a SaaS platform',
-  'a web application',
-  'an Android app',
-  'an AI tool',
-  'early access to the creator platform',
-  'something else',
+export const SERVICES = [
+  {
+    title: 'SaaS platforms',
+    body: 'Subscription products with accounts, roles and admin tools, built to grow with your customers.',
+    icon: 'layers',
+  },
+  {
+    title: 'Web applications',
+    body: 'Portals, dashboards and internal tools that replace spreadsheets and manual work.',
+    icon: 'browser',
+  },
+  {
+    title: 'Mobile apps',
+    body: 'Native Android apps that are fast, reliable and work well on any network.',
+    icon: 'phone',
+  },
+  {
+    title: 'AI solutions',
+    body: 'Practical AI for documents, search and assistants, built into the tools your team already uses.',
+    icon: 'spark',
+  },
 ] as const
 
-export type Interest = (typeof INTERESTS)[number]
-
-/** Lets any section pre-select an interest in the contact composer. */
-export function requestInterest(interest: Interest) {
-  window.dispatchEvent(new CustomEvent<Interest>('rs:interest', { detail: interest }))
-  document.getElementById('contact')?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
-}
+export const PRODUCTS = [
+  {
+    name: 'Kosha',
+    status: 'Early access',
+    body: 'Secure photo and video backup for businesses. Invite-only access, organised folders and low-cost archive storage, on Android and the web.',
+  },
+  {
+    name: 'Creator media platform',
+    status: 'In development',
+    body: 'Upload, organise and securely share large video files with editors, without expiring links or failed transfers.',
+  },
+]
 
 export function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
