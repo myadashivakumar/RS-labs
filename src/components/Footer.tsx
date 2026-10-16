@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, PRODUCTS, SERVICES } from '../content'
+import { CONTACT_EMAIL, PRODUCTS, PRODUCTS_LIVE, SERVICES } from '../content'
 import { Wordmark } from './Mark'
 
 export function Footer() {
@@ -22,9 +22,13 @@ export function Footer() {
         <div>
           <p className={col}>Products</p>
           <ul className="mt-4 space-y-2.5">
-            {PRODUCTS.map((p) => (
-              <li key={p.name}><a href="#products" className={link}>{p.name}</a></li>
-            ))}
+            {PRODUCTS_LIVE ? (
+              PRODUCTS.map((p) => (
+                <li key={p.name}><a href="#products" className={link}>{p.name}</a></li>
+              ))
+            ) : (
+              <li><a href="#products" className={link}>Coming soon</a></li>
+            )}
           </ul>
         </div>
         <div>

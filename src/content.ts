@@ -32,6 +32,12 @@ export const SERVICES = [
   },
 ] as const
 
+/**
+ * Products stay hidden (blurred "Coming soon" cards, no names on the page)
+ * until the apps are released. Flip to true at launch.
+ */
+export const PRODUCTS_LIVE = false
+
 export const PRODUCTS = [
   {
     name: 'Kosha',
