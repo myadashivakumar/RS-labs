@@ -1,20 +1,38 @@
 import { useState, type FormEvent } from 'react'
-import { CONTACT_EMAIL } from '../content'
+import { CONTACT_EMAIL, FORMSPREE_ENDPOINT } from '../content'
+
+type Status = 'idle' | 'sending' | 'sent' | 'error'
 
 /**
- * Dark contact band. There's no backend: the form prepares an email in the
- * visitor's own mail app, and the address is shown for anyone who'd rather write.
+ * Dark contact band. Messages go to our inbox through Formspree; without an
+ * endpoint configured, the form falls back to opening the visitor's email app.
  */
 export function Contact() {
-  const [name, setName] = useState('')
-  const [company, setCompany] = useState('')
-  const [message, setMessage] = useState('')
+  const [status, setStatus] = useState<Status>('idle')
 
-  function send(e: FormEvent) {
+  async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const subject = `Enquiry from ${name.trim() || 'the website'}${company.trim() ? ` (${company.trim()})` : ''}`
-    const body = `${message.trim()}\n\n${name.trim()}${company.trim() ? `\n${company.trim()}` : ''}`
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    const form = e.currentTarget
+    const data = new FormData(form)
+    const name = String(data.get('name') ?? '').trim()
+    const company = String(data.get('company') ?? '').trim()
+    data.set('_subject', `RS Labs enquiry from ${name}${company ? ` (${company})` : ''}`)
+
+    if (!FORMSPREE_ENDPOINT) {
+      const body = `${data.get('message')}\n\n${name}${company ? `\n${company}` : ''}\n${data.get('email')}`
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(String(data.get('_subject')))}&body=${encodeURIComponent(body)}`
+      return
+    }
+
+    setStatus('sending')
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, { method: 'POST', headers: { Accept: 'application/json' }, body: data })
+      if (!res.ok) throw new Error(String(res.status))
+      form.reset()
+      setStatus('sent')
+    } catch {
+      setStatus('error')
+    }
   }
 
   const field =
@@ -38,33 +56,52 @@ export function Contact() {
           </a>
         </div>
 
-        <form onSubmit={send} className="grid gap-6 sm:grid-cols-2" data-reveal>
-          <label className="block text-sm text-white/70">
-            Your name
-            <input required value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className={field} />
-          </label>
-          <label className="block text-sm text-white/70">
-            Company <span className="text-white/40">(optional)</span>
-            <input value={company} onChange={(e) => setCompany(e.target.value)} autoComplete="organization" className={field} />
-          </label>
-          <label className="block text-sm text-white/70 sm:col-span-2">
-            How can we help?
-            <textarea
-              required
-              rows={4}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="A few lines about your project"
-              className={`${field} resize-y`}
-            />
-          </label>
-          <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
-            <button type="submit" className="rounded-md bg-white px-6 py-3.5 font-medium text-ink transition-colors hover:bg-lavender">
-              Send message
+        {status === 'sent' ? (
+          <div role="status" className="self-center rounded-xl border border-white/15 bg-white/5 p-8">
+            <p className="text-2xl font-medium">Thanks, your message is on its way.</p>
+            <p className="mt-2 text-white/70">We'll reply to the email address you gave us.</p>
+            <button type="button" onClick={() => setStatus('idle')} className="mt-6 text-sm text-[#9db8ff] underline underline-offset-4 hover:text-white">
+              Send another message
             </button>
-            <p className="text-sm text-white/50">Opens your email app with the message ready to send.</p>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={send} className="grid gap-6 sm:grid-cols-2" data-reveal>
+            <label className="block text-sm text-white/70">
+              Your name
+              <input name="name" required autoComplete="name" className={field} />
+            </label>
+            <label className="block text-sm text-white/70">
+              Email
+              <input name="email" type="email" required autoComplete="email" className={field} />
+            </label>
+            <label className="block text-sm text-white/70 sm:col-span-2">
+              Company <span className="text-white/40">(optional)</span>
+              <input name="company" autoComplete="organization" className={field} />
+            </label>
+            <label className="block text-sm text-white/70 sm:col-span-2">
+              How can we help?
+              <textarea name="message" required rows={4} placeholder="A few lines about your project" className={`${field} resize-y`} />
+            </label>
+            {/* Spam trap: hidden from people, filled in by bots, rejected by Formspree */}
+            <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+            <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
+              <button
+                type="submit"
+                disabled={status === 'sending'}
+                className="rounded-md bg-white px-6 py-3.5 font-medium text-ink transition-colors hover:bg-lavender disabled:opacity-60"
+              >
+                {status === 'sending' ? 'Sending…' : 'Send message'}
+              </button>
+              <p role="status" className={`text-sm ${status === 'error' ? 'text-[#ffb4b4]' : 'text-white/50'}`}>
+                {status === 'error'
+                  ? `Couldn't send right now. Please try again, or email ${CONTACT_EMAIL}.`
+                  : FORMSPREE_ENDPOINT
+                    ? "We'll reply by email."
+                    : 'Opens your email app with the message ready to send.'}
+              </p>
+            </div>
+          </form>
+        )}
       </div>
     </section>
   )
